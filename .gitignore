@@ -1,0 +1,99 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Flutter/Dart-specific files
+.dart_tool/
+.flutter-plugins
+.pub/
+build/
+.dart_tool/
+.idea/
+.packages
+
+# Android-specific files
+android/
+*.iml
+local.properties
+.gradle
+/build/
+/captures/
+
+# iOS-specific files
+ios/
+Podfile.lock
+Pods/
+*.xcworkspace
+*.pbxproj
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Windows-specific files
+windows/
+*.suo
+*.user
+*.sln
+*.vcxproj
+*.filters
+Runner.sln
+Runner.vcxproj
+Runner.vcxproj.filters
+
+# macOS-specific files
+macos/
+macos/Flutter/Flutter.xcodeproj/
+macos/Flutter/Generated.xcconfig/
+macos/Flutter/flutter_assets/
+macos/Flutter/clang.xcconfig
+macos/Flutter/AppFrameworkInfo.plist
+macos/Flutter/flutter_export_environment.sh
+macos/Runner.xcodeproj/
+
+# Web-specific files
+web/
+web/index.html
+web/main.dart.js
+web/packages/
+web/.dart_tool/
