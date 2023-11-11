@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_voiceassistant/widgets/try_commands.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import '../models/app_state.dart';
@@ -13,14 +14,16 @@ import '../utils/app_config.dart';
 
 class HomePage extends StatefulWidget {
   final AppConfig config;
+  final String wakeWord;
 
-  HomePage({Key? key, required this.config});
+  HomePage({Key? key, required this.config, required this.wakeWord});
   @override
   HomePageState createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
   late AppConfig _config; // Store the config as an instance variable
+  late String _wakeWord; // Store the wake word as an instance variable
   final ScrollController _scrollController = ScrollController();
   List<ChatMessage> chatMessages = [];
   StreamSubscription<WakeWordStatus>? _wakeWordStatusSubscription;
@@ -30,6 +33,7 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _config = widget.config; // Initialize _config in the initState
+    _wakeWord = widget.wakeWord; // Initialize _wakeWord in the initState
     addChatMessage(
         "Assistant in Manual mode. You can send commands directly by pressing the record button.");
   }
@@ -39,11 +43,12 @@ class HomePageState extends State<HomePage> {
     clearChatMessages();
     appState.streamId = "";
     appState.isWakeWordDetected = false;
+    appState.isCommandProcessing = false;
 
     if (newMode == AssistantMode.wakeWord) {
       appState.isWakeWordMode = true;
       addChatMessage(
-          'Switched to Wake Word mode. I\'ll listen for the wake word before responding.');
+          'Switched to Wake Word mode. I\'ll listen for the wake word "$_wakeWord" before responding.');
       toggleWakeWordDetection(context, true);
     } else if (newMode == AssistantMode.manual) {
       appState.isWakeWordMode = false;
@@ -99,13 +104,19 @@ class HomePageState extends State<HomePage> {
     if (isRecording) {
       appState.streamId = await startRecording();
     } else {
+      appState.commandProcessingText = "Converting speech to text...";
+      appState.isCommandProcessing = true;
+      setState(
+          () {}); // Trigger a rebuild to ensure the loading indicator is shown, tis a bad practice though but deosn't heavily affect the performance
       final response =
           await stopRecording(appState.streamId, appState.intentEngine);
       // Process and store the result
       if (response.status == RecognizeStatusType.REC_SUCCESS) {
-        await executeVoiceCommand(
+        appState.commandProcessingText = "Executing command...";
+        await executeCommand(
             response); // Call executeVoiceCommand with the response
       }
+      appState.isCommandProcessing = false;
     }
   }
 
@@ -158,7 +169,7 @@ class HomePageState extends State<HomePage> {
     voiceAgentClient = VoiceAgentClient(_config.grpcHost, _config.grpcPort);
     try {
       // Create a RecognizeControl message to start recording
-      final controlMessage = RecognizeControl()
+      final controlMessage = RecognizeVoiceControl()
         ..action = RecordAction.START
         ..recordMode = RecordMode
             .MANUAL; // You can change this to your desired record mode
@@ -186,7 +197,7 @@ class HomePageState extends State<HomePage> {
         model = NLUModel.SNIPS;
       }
       // Create a RecognizeControl message to stop recording
-      final controlMessage = RecognizeControl()
+      final controlMessage = RecognizeVoiceControl()
         ..action = RecordAction.STOP
         ..nluModel = model
         ..streamId =
@@ -226,7 +237,46 @@ class HomePageState extends State<HomePage> {
     // await voiceAgentClient.shutdown();
   }
 
-  Future<void> executeVoiceCommand(RecognizeResult response) async {
+  Future<RecognizeResult> recognizeTextCommand(
+      String command, String nluModel) async {
+    voiceAgentClient = VoiceAgentClient(_config.grpcHost, _config.grpcPort);
+    try {
+      NLUModel model = NLUModel.RASA;
+      if (nluModel == "snips") {
+        model = NLUModel.SNIPS;
+      }
+      // Create a RecognizeControl message to stop recording
+      final controlMessage = RecognizeTextControl()
+        ..textCommand = command
+        ..nluModel = model;
+
+      // Call the gRPC method to stop recording
+      final response =
+          await voiceAgentClient.recognizeTextCommand(controlMessage);
+
+      // Process and store the result
+      if (response.status == RecognizeStatusType.REC_SUCCESS) {
+        // Do nothing
+      } else if (response.status == RecognizeStatusType.INTENT_NOT_RECOGNIZED) {
+        final command = response.command;
+        addChatMessage(command, isUserMessage: true);
+        addChatMessage(
+            "Unable to undertsand the intent behind your request. Please try again.");
+      } else {
+        addChatMessage(
+            'Failed to process your text command. Please try again.');
+      }
+      await voiceAgentClient.shutdown();
+      return response;
+    } catch (e) {
+      print('Error encountered during text command recognition: $e');
+      addChatMessage('Failed to process your text command. Please try again.');
+      await voiceAgentClient.shutdown();
+      return RecognizeResult()..status = RecognizeStatusType.REC_ERROR;
+    }
+  }
+
+  Future<void> executeCommand(RecognizeResult response) async {
     voiceAgentClient = VoiceAgentClient(_config.grpcHost, _config.grpcPort);
     try {
       // Create an ExecuteInput message using the response from stopRecording
@@ -235,8 +285,7 @@ class HomePageState extends State<HomePage> {
         ..intentSlots.addAll(response.intentSlots);
 
       // Call the gRPC method to execute the voice command
-      final execResponse =
-          await voiceAgentClient.executeVoiceCommand(executeInput);
+      final execResponse = await voiceAgentClient.executeCommand(executeInput);
 
       // Handle the response as needed
       if (execResponse.status == ExecuteStatusType.EXEC_SUCCESS) {
@@ -256,6 +305,28 @@ class HomePageState extends State<HomePage> {
       addChatMessage('Failed to execute your voice command. Please try again.');
     }
     await voiceAgentClient.shutdown();
+  }
+
+  Future<void> handleCommandTap(String command) async {
+    final appState = context.read<AppState>();
+    addChatMessage(command, isUserMessage: true);
+    appState.isCommandProcessing = true;
+    appState.commandProcessingText = "Recognizing intent...";
+
+    setState(
+        () {}); // Trigger a rebuild to ensure the loading indicator is shown, tis a bad practice though but deosn't heavily affect the performance
+
+    final response = await recognizeTextCommand(command, appState.intentEngine);
+    // Process and store the result
+    if (response.status == RecognizeStatusType.REC_SUCCESS) {
+      appState.commandProcessingText = "Executing command...";
+      setState(
+          () {}); // Trigger a rebuild to ensure the loading indicator is shown, tis a bad practice though but deosn't heavily affect the performance
+      await executeCommand(
+          response); // Call executeVoiceCommand with the response
+    }
+
+    appState.isCommandProcessing = false;
   }
 
   @override
@@ -280,7 +351,7 @@ class HomePageState extends State<HomePage> {
                   "AGL Voice Assistant",
                   style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -299,7 +370,7 @@ class HomePageState extends State<HomePage> {
                               Text(
                                 'Assistant Mode',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -339,7 +410,7 @@ class HomePageState extends State<HomePage> {
                               Text(
                                 'Intent Engine',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -363,23 +434,44 @@ class HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 15),
                 ChatSection(
                   scrollController: _scrollController,
                   chatMessages: chatMessages,
                   addChatMessage: addChatMessage,
                 ),
+                SizedBox(height: 10),
+                if (!appState.isWakeWordMode || appState.isWakeWordDetected)
+                  TryCommandsSection(onCommandTap: handleCommandTap),
                 SizedBox(height: 30),
                 if (!appState.isWakeWordMode || appState.isWakeWordDetected)
-                  Center(
-                    child: Consumer<AppState>(builder: (context, appState, _) {
-                      return RecordCommandButton(
-                        onRecordingStateChanged: (isRecording) {
-                          changeCommandRecordingState(context, isRecording);
-                        },
-                      );
-                    }),
-                  )
+                  if (!appState.isCommandProcessing)
+                    Center(
+                      child:
+                          Consumer<AppState>(builder: (context, appState, _) {
+                        return RecordCommandButton(
+                          onRecordingStateChanged: (isRecording) {
+                            changeCommandRecordingState(context, isRecording);
+                          },
+                        );
+                      }),
+                    )
+                  else
+                    Column(children: [
+                      Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      SizedBox(height: 12),
+                      Center(
+                        child: Text(
+                          appState.commandProcessingText,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ])
                 else
                   Center(
                     child: Consumer<AppState>(
@@ -388,6 +480,7 @@ class HomePageState extends State<HomePage> {
                       },
                     ),
                   ),
+                SizedBox(height: 30),
               ],
             ),
           ),

@@ -43,57 +43,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Flutter/Dart-specific files
-.dart_tool/
-.flutter-plugins
-.pub/
-build/
-.dart_tool/
-.idea/
-.packages
-
-# Android-specific files
-android/
-*.iml
-local.properties
-.gradle
-/build/
-/captures/
-
-# iOS-specific files
-ios/
-Podfile.lock
-Pods/
-*.xcworkspace
-*.pbxproj
-*.mode1v3
-*.mode2v3
-*.perspectivev3
-
-# Windows-specific files
+# ignore folders other than linux
 windows/
-*.suo
-*.user
-*.sln
-*.vcxproj
-*.filters
-Runner.sln
-Runner.vcxproj
-Runner.vcxproj.filters
-
-# macOS-specific files
 macos/
-macos/Flutter/Flutter.xcodeproj/
-macos/Flutter/Generated.xcconfig/
-macos/Flutter/flutter_assets/
-macos/Flutter/clang.xcconfig
-macos/Flutter/AppFrameworkInfo.plist
-macos/Flutter/flutter_export_environment.sh
-macos/Runner.xcodeproj/
-
-# Web-specific files
-web/
-web/index.html
-web/main.dart.js
-web/packages/
-web/.dart_tool/
+android/
+ios/
