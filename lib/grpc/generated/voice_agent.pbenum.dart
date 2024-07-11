@@ -13,6 +13,36 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+class STTFramework extends $pb.ProtobufEnum {
+  static const STTFramework VOSK = STTFramework._(0, _omitEnumNames ? '' : 'VOSK');
+  static const STTFramework WHISPER = STTFramework._(1, _omitEnumNames ? '' : 'WHISPER');
+
+  static const $core.List<STTFramework> values = <STTFramework> [
+    VOSK,
+    WHISPER,
+  ];
+
+  static final $core.Map<$core.int, STTFramework> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static STTFramework? valueOf($core.int value) => _byValue[value];
+
+  const STTFramework._($core.int v, $core.String n) : super(v, n);
+}
+
+class OnlineMode extends $pb.ProtobufEnum {
+  static const OnlineMode ONLINE = OnlineMode._(0, _omitEnumNames ? '' : 'ONLINE');
+  static const OnlineMode OFFLINE = OnlineMode._(1, _omitEnumNames ? '' : 'OFFLINE');
+
+  static const $core.List<OnlineMode> values = <OnlineMode> [
+    ONLINE,
+    OFFLINE,
+  ];
+
+  static final $core.Map<$core.int, OnlineMode> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static OnlineMode? valueOf($core.int value) => _byValue[value];
+
+  const OnlineMode._($core.int v, $core.String n) : super(v, n);
+}
+
 class RecordAction extends $pb.ProtobufEnum {
   static const RecordAction START = RecordAction._(0, _omitEnumNames ? '' : 'START');
   static const RecordAction STOP = RecordAction._(1, _omitEnumNames ? '' : 'STOP');

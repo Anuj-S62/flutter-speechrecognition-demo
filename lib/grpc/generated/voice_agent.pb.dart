@@ -9,6 +9,7 @@
 // ignore_for_file: non_constant_identifier_names, prefer_final_fields
 // ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
+import 'dart:async' as $async;
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
@@ -274,6 +275,7 @@ class S_RecognizeVoiceControl extends $pb.GeneratedMessage {
     VoiceAudio? audioStream,
     NLUModel? nluModel,
     $core.String? streamId,
+    STTFramework? sttFramework,
   }) {
     final $result = create();
     if (audioStream != null) {
@@ -285,6 +287,9 @@ class S_RecognizeVoiceControl extends $pb.GeneratedMessage {
     if (streamId != null) {
       $result.streamId = streamId;
     }
+    if (sttFramework != null) {
+      $result.sttFramework = sttFramework;
+    }
     return $result;
   }
   S_RecognizeVoiceControl._() : super();
@@ -295,6 +300,7 @@ class S_RecognizeVoiceControl extends $pb.GeneratedMessage {
     ..aOM<VoiceAudio>(1, _omitFieldNames ? '' : 'audioStream', subBuilder: VoiceAudio.create)
     ..e<NLUModel>(2, _omitFieldNames ? '' : 'nluModel', $pb.PbFieldType.OE, defaultOrMaker: NLUModel.SNIPS, valueOf: NLUModel.valueOf, enumValues: NLUModel.values)
     ..aOS(3, _omitFieldNames ? '' : 'streamId')
+    ..e<STTFramework>(4, _omitFieldNames ? '' : 'sttFramework', $pb.PbFieldType.OE, defaultOrMaker: STTFramework.VOSK, valueOf: STTFramework.valueOf, enumValues: STTFramework.values)
     ..hasRequiredFields = false
   ;
 
@@ -347,6 +353,15 @@ class S_RecognizeVoiceControl extends $pb.GeneratedMessage {
   $core.bool hasStreamId() => $_has(2);
   @$pb.TagNumber(3)
   void clearStreamId() => clearField(3);
+
+  @$pb.TagNumber(4)
+  STTFramework get sttFramework => $_getN(3);
+  @$pb.TagNumber(4)
+  set sttFramework(STTFramework v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasSttFramework() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSttFramework() => clearField(4);
 }
 
 class RecognizeVoiceControl extends $pb.GeneratedMessage {
@@ -355,6 +370,8 @@ class RecognizeVoiceControl extends $pb.GeneratedMessage {
     NLUModel? nluModel,
     RecordMode? recordMode,
     $core.String? streamId,
+    STTFramework? sttFramework,
+    OnlineMode? onlineMode,
   }) {
     final $result = create();
     if (action != null) {
@@ -369,6 +386,12 @@ class RecognizeVoiceControl extends $pb.GeneratedMessage {
     if (streamId != null) {
       $result.streamId = streamId;
     }
+    if (sttFramework != null) {
+      $result.sttFramework = sttFramework;
+    }
+    if (onlineMode != null) {
+      $result.onlineMode = onlineMode;
+    }
     return $result;
   }
   RecognizeVoiceControl._() : super();
@@ -380,6 +403,8 @@ class RecognizeVoiceControl extends $pb.GeneratedMessage {
     ..e<NLUModel>(2, _omitFieldNames ? '' : 'nluModel', $pb.PbFieldType.OE, defaultOrMaker: NLUModel.SNIPS, valueOf: NLUModel.valueOf, enumValues: NLUModel.values)
     ..e<RecordMode>(3, _omitFieldNames ? '' : 'recordMode', $pb.PbFieldType.OE, defaultOrMaker: RecordMode.MANUAL, valueOf: RecordMode.valueOf, enumValues: RecordMode.values)
     ..aOS(4, _omitFieldNames ? '' : 'streamId')
+    ..e<STTFramework>(5, _omitFieldNames ? '' : 'sttFramework', $pb.PbFieldType.OE, defaultOrMaker: STTFramework.VOSK, valueOf: STTFramework.valueOf, enumValues: STTFramework.values)
+    ..e<OnlineMode>(6, _omitFieldNames ? '' : 'onlineMode', $pb.PbFieldType.OE, defaultOrMaker: OnlineMode.ONLINE, valueOf: OnlineMode.valueOf, enumValues: OnlineMode.values)
     ..hasRequiredFields = false
   ;
 
@@ -439,6 +464,24 @@ class RecognizeVoiceControl extends $pb.GeneratedMessage {
   $core.bool hasStreamId() => $_has(3);
   @$pb.TagNumber(4)
   void clearStreamId() => clearField(4);
+
+  @$pb.TagNumber(5)
+  STTFramework get sttFramework => $_getN(4);
+  @$pb.TagNumber(5)
+  set sttFramework(STTFramework v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasSttFramework() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearSttFramework() => clearField(5);
+
+  @$pb.TagNumber(6)
+  OnlineMode get onlineMode => $_getN(5);
+  @$pb.TagNumber(6)
+  set onlineMode(OnlineMode v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasOnlineMode() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearOnlineMode() => clearField(6);
 }
 
 class RecognizeTextControl extends $pb.GeneratedMessage {
@@ -789,6 +832,33 @@ class ExecuteResult extends $pb.GeneratedMessage {
   $core.bool hasStatus() => $_has(1);
   @$pb.TagNumber(2)
   void clearStatus() => clearField(2);
+}
+
+class VoiceAgentServiceApi {
+  $pb.RpcClient _client;
+  VoiceAgentServiceApi(this._client);
+
+  $async.Future<ServiceStatus> checkServiceStatus($pb.ClientContext? ctx, Empty request) =>
+    _client.invoke<ServiceStatus>(ctx, 'VoiceAgentService', 'CheckServiceStatus', request, ServiceStatus())
+  ;
+  $async.Future<WakeWordStatus> s_DetectWakeWord($pb.ClientContext? ctx, VoiceAudio request) =>
+    _client.invoke<WakeWordStatus>(ctx, 'VoiceAgentService', 'S_DetectWakeWord', request, WakeWordStatus())
+  ;
+  $async.Future<WakeWordStatus> detectWakeWord($pb.ClientContext? ctx, Empty request) =>
+    _client.invoke<WakeWordStatus>(ctx, 'VoiceAgentService', 'DetectWakeWord', request, WakeWordStatus())
+  ;
+  $async.Future<RecognizeResult> s_RecognizeVoiceCommand($pb.ClientContext? ctx, S_RecognizeVoiceControl request) =>
+    _client.invoke<RecognizeResult>(ctx, 'VoiceAgentService', 'S_RecognizeVoiceCommand', request, RecognizeResult())
+  ;
+  $async.Future<RecognizeResult> recognizeVoiceCommand($pb.ClientContext? ctx, RecognizeVoiceControl request) =>
+    _client.invoke<RecognizeResult>(ctx, 'VoiceAgentService', 'RecognizeVoiceCommand', request, RecognizeResult())
+  ;
+  $async.Future<RecognizeResult> recognizeTextCommand($pb.ClientContext? ctx, RecognizeTextControl request) =>
+    _client.invoke<RecognizeResult>(ctx, 'VoiceAgentService', 'RecognizeTextCommand', request, RecognizeResult())
+  ;
+  $async.Future<ExecuteResult> executeCommand($pb.ClientContext? ctx, ExecuteInput request) =>
+    _client.invoke<ExecuteResult>(ctx, 'VoiceAgentService', 'ExecuteCommand', request, ExecuteResult())
+  ;
 }
 
 

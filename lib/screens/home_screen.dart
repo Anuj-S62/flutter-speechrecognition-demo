@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_voiceassistant/widgets/online_mode_choice.dart';
 import 'package:flutter_voiceassistant/widgets/try_commands.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
@@ -13,6 +14,7 @@ import '../widgets/chat_section.dart';
 import '../grpc/generated/voice_agent.pbgrpc.dart';
 import '../grpc/voice_agent_client.dart';
 import '../utils/app_config.dart';
+import '../widgets/stt_model_choice.dart';
 
 class HomePage extends StatefulWidget {
   final AppConfig config;
@@ -90,6 +92,38 @@ class HomePageState extends State<HomePage> {
     setState(() {}); // Trigger a rebuild
   }
 
+  void changeSTTFramework(BuildContext context, STTModel newModel) {
+    final appState = context.read<AppState>();
+
+    if (newModel == STTModel.vosk) {
+      appState.sttFramework = "vosk";
+      // vosk is fast and efficient
+      addChatMessage(
+          'Switched to 🚀 Vosk framework. Lets be quick and efficient.');
+    } else if (newModel == STTModel.whisper) {
+      appState.sttFramework = "whisper";
+      addChatMessage(
+          'Switched to 🤖 Whisper framework. Conversations just got smarter!');
+    }
+    print(appState.sttFramework);
+    setState(() {}); // Trigger a rebuild
+  }
+
+  void toggleOnlineMode(BuildContext context, OnlineModeEnum mode) {
+    final appState = context.read<AppState>();
+
+    if (mode == OnlineModeEnum.enabled) {
+      appState.onlineMode = true;
+      addChatMessage(
+          'Switched to Online mode. I\'ll be connected to the internet for better results.');
+    } else {
+      appState.onlineMode = false;
+      addChatMessage(
+          'Switched to Offline mode. I\'ll be disconnected from the internet.');
+    }
+    setState(() {}); // Trigger a rebuild
+  }
+
   void addChatMessage(String text, {bool isUserMessage = false}) {
     final newMessage = ChatMessage(text: text, isUserMessage: isUserMessage);
     setState(() {
@@ -123,7 +157,7 @@ class HomePageState extends State<HomePage> {
       setState(
           () {}); // Trigger a rebuild to ensure the loading indicator is shown, tis a bad practice though but deosn't heavily affect the performance
       final response =
-          await stopRecording(appState.streamId, appState.intentEngine);
+          await stopRecording(appState.streamId, appState.intentEngine,appState.sttFramework,appState.onlineMode);
       // Process and store the result
       if (response.status == RecognizeStatusType.REC_SUCCESS) {
         appState.commandProcessingText = "Executing command...";
@@ -204,11 +238,20 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<RecognizeResult> stopRecording(
-      String streamId, String nluModel) async {
+      String streamId, String nluModel, String stt,bool isOnlineMode) async {
+
     try {
       NLUModel model = NLUModel.RASA;
       if (nluModel == "snips") {
         model = NLUModel.SNIPS;
+      }
+      STTFramework sttFramework = STTFramework.VOSK;
+      if (stt == "whisper") {
+        sttFramework = STTFramework.WHISPER;
+      }
+      OnlineMode onlineMode = OnlineMode.OFFLINE;
+      if (isOnlineMode) {
+        onlineMode = OnlineMode.ONLINE;
       }
       // Create a RecognizeControl message to stop recording
       final controlMessage = RecognizeVoiceControl()
@@ -216,7 +259,10 @@ class HomePageState extends State<HomePage> {
         ..nluModel = model
         ..streamId =
             streamId // Use the same stream ID as when starting recording
-        ..recordMode = RecordMode.MANUAL;
+        ..recordMode = RecordMode.MANUAL
+        ..sttFramework = sttFramework
+        ..onlineMode = onlineMode;
+
 
       // Create a Stream with the control message
       final controlStream = Stream.fromIterable([controlMessage]);
@@ -375,116 +421,234 @@ class HomePageState extends State<HomePage> {
                   style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Column(
                   children: [
-                    Flexible(
-                      flex: 1,
-                      child: ClipRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                          child: Card(
-                            color: _config.theme == "textured-dark" ||
-                                    _config.theme == "textured-light"
-                                ? Colors.transparent
-                                : null,
-                            elevation: 4, // Add elevation for shadow
-                            shadowColor: _config.theme == "textured-dark" ||
-                                    _config.theme == "textured-light"
-                                ? Colors.transparent
-                                : null,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Assistant Mode',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 16), // Add spacing if needed
-                                  Center(
-                                    child: Consumer<AppState>(
-                                      builder: (context, appState, _) {
-                                        return AssistantModeChoice(
-                                          onModeChanged: (newMode) {
-                                            changeAssistantMode(
-                                                context, newMode);
-                                            print(newMode);
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          flex: 1,
+                          child: ClipRect(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                              child: Card(
+                                color: _config.theme == "textured-dark" ||
+                                        _config.theme == "textured-light"
+                                    ? Colors.transparent
+                                    : null,
+                                elevation: 4, // Add elevation for shadow
+                                shadowColor: _config.theme == "textured-dark" ||
+                                        _config.theme == "textured-light"
+                                    ? Colors.transparent
+                                    : null,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Assistant Mode',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16), // Add spacing if needed
+                                      Center(
+                                        child: Consumer<AppState>(
+                                          builder: (context, appState, _) {
+                                            return AssistantModeChoice(
+                                              onModeChanged: (newMode) {
+                                                changeAssistantMode(
+                                                    context, newMode);
+                                                print(newMode);
+                                              },
+                                              theme: _config.theme,
+                                            );
                                           },
-                                          theme: _config.theme,
-                                        );
-                                      },
-                                    ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
 
-                    SizedBox(width: 20), // Add spacing between buttons
+                        SizedBox(width: 20), // Add spacing between buttons
 
-                    Flexible(
-                      flex: 1,
-                      child: ClipRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                          child: Card(
-                            color: _config.theme == "textured-dark" ||
-                                    _config.theme == "textured-light"
-                                ? Colors.transparent
-                                : null,
-                            elevation: 4, // Add elevation for shadow
-                            shadowColor: _config.theme == "textured-dark" ||
-                                    _config.theme == "textured-light"
-                                ? Colors.transparent
-                                : null,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Intent Engine',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 16), // Add spacing if needed
-                                  Center(
-                                    child: Consumer<AppState>(
-                                      builder: (context, appState, _) {
-                                        return NLUEngineChoice(
-                                          onEngineChanged: (newEngine) {
-                                            changeIntentEngine(
-                                                context, newEngine);
-                                            print(newEngine);
+                        Flexible(
+                          flex: 1,
+                          child: ClipRect(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                              child: Card(
+                                color: _config.theme == "textured-dark" ||
+                                        _config.theme == "textured-light"
+                                    ? Colors.transparent
+                                    : null,
+                                elevation: 4, // Add elevation for shadow
+                                shadowColor: _config.theme == "textured-dark" ||
+                                        _config.theme == "textured-light"
+                                    ? Colors.transparent
+                                    : null,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Intent Engine',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16), // Add spacing if needed
+                                      Center(
+                                        child: Consumer<AppState>(
+                                          builder: (context, appState, _) {
+                                            return NLUEngineChoice(
+                                              onEngineChanged: (newEngine) {
+                                                changeIntentEngine(
+                                                    context, newEngine);
+                                                print(newEngine);
+                                              },
+                                              theme: _config.theme,
+                                            );
                                           },
-                                          theme: _config.theme,
-                                        );
-                                      },
-                                    ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          flex: 1,
+                          child: ClipRect(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                              child: Card(
+                                color: _config.theme == "textured-dark" ||
+                                    _config.theme == "textured-light"
+                                    ? Colors.transparent
+                                    : null,
+                                elevation: 4, // Add elevation for shadow
+                                shadowColor: _config.theme == "textured-dark" ||
+                                    _config.theme == "textured-light"
+                                    ? Colors.transparent
+                                    : null,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Speech-to-Text Model',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16), // Add spacing if needed
+                                      Center(
+                                        child: Consumer<AppState>(
+                                          builder: (context, appState, _) {
+                                            return STTModelChoice(
+                                              onModelChanged: (newModel) {
+                                                changeSTTFramework(
+                                                    context, newModel);
+                                                print(newModel);
+                                              },
+                                              theme: _config.theme,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(width: 20), // Add spacing between buttons
+
+                        Flexible(
+                          flex: 1,
+                          child: ClipRect(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                              child: Card(
+                                color: _config.theme == "textured-dark" ||
+                                    _config.theme == "textured-light"
+                                    ? Colors.transparent
+                                    : null,
+                                elevation: 4, // Add elevation for shadow
+                                shadowColor: _config.theme == "textured-dark" ||
+                                    _config.theme == "textured-light"
+                                    ? Colors.transparent
+                                    : null,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Online Mode',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16), // Add spacing if needed
+                                      Center(
+                                        child: Consumer<AppState>(
+                                          builder: (context, appState, _) {
+                                            return OnlineModeChoice(
+                                              onModeChanged: (mode) {
+                                                toggleOnlineMode(context, mode);
+                                                print(mode);
+                                              },
+                                              theme: _config.theme,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+
                   ],
                 ),
                 SizedBox(height: 15),

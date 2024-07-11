@@ -7,4 +7,6 @@ class AppState extends ChangeNotifier {
   String streamId = "";
   bool isCommandProcessing = false;
   String commandProcessingText = "Processing...";
+  String sttFramework = "vosk";
+  bool onlineMode = false;
 }

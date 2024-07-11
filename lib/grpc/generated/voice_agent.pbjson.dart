@@ -13,6 +13,32 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
+@$core.Deprecated('Use sTTFrameworkDescriptor instead')
+const STTFramework$json = {
+  '1': 'STTFramework',
+  '2': [
+    {'1': 'VOSK', '2': 0},
+    {'1': 'WHISPER', '2': 1},
+  ],
+};
+
+/// Descriptor for `STTFramework`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List sTTFrameworkDescriptor = $convert.base64Decode(
+    'CgxTVFRGcmFtZXdvcmsSCAoEVk9TSxAAEgsKB1dISVNQRVIQAQ==');
+
+@$core.Deprecated('Use onlineModeDescriptor instead')
+const OnlineMode$json = {
+  '1': 'OnlineMode',
+  '2': [
+    {'1': 'ONLINE', '2': 0},
+    {'1': 'OFFLINE', '2': 1},
+  ],
+};
+
+/// Descriptor for `OnlineMode`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List onlineModeDescriptor = $convert.base64Decode(
+    'CgpPbmxpbmVNb2RlEgoKBk9OTElORRAAEgsKB09GRkxJTkUQAQ==');
+
 @$core.Deprecated('Use recordActionDescriptor instead')
 const RecordAction$json = {
   '1': 'RecordAction',
@@ -151,6 +177,7 @@ const S_RecognizeVoiceControl$json = {
     {'1': 'audio_stream', '3': 1, '4': 1, '5': 11, '6': '.VoiceAudio', '10': 'audioStream'},
     {'1': 'nlu_model', '3': 2, '4': 1, '5': 14, '6': '.NLUModel', '10': 'nluModel'},
     {'1': 'stream_id', '3': 3, '4': 1, '5': 9, '10': 'streamId'},
+    {'1': 'stt_framework', '3': 4, '4': 1, '5': 14, '6': '.STTFramework', '10': 'sttFramework'},
   ],
 };
 
@@ -158,7 +185,8 @@ const S_RecognizeVoiceControl$json = {
 final $typed_data.Uint8List s_RecognizeVoiceControlDescriptor = $convert.base64Decode(
     'ChdTX1JlY29nbml6ZVZvaWNlQ29udHJvbBIuCgxhdWRpb19zdHJlYW0YASABKAsyCy5Wb2ljZU'
     'F1ZGlvUgthdWRpb1N0cmVhbRImCglubHVfbW9kZWwYAiABKA4yCS5OTFVNb2RlbFIIbmx1TW9k'
-    'ZWwSGwoJc3RyZWFtX2lkGAMgASgJUghzdHJlYW1JZA==');
+    'ZWwSGwoJc3RyZWFtX2lkGAMgASgJUghzdHJlYW1JZBIyCg1zdHRfZnJhbWV3b3JrGAQgASgOMg'
+    '0uU1RURnJhbWV3b3JrUgxzdHRGcmFtZXdvcms=');
 
 @$core.Deprecated('Use recognizeVoiceControlDescriptor instead')
 const RecognizeVoiceControl$json = {
@@ -168,6 +196,8 @@ const RecognizeVoiceControl$json = {
     {'1': 'nlu_model', '3': 2, '4': 1, '5': 14, '6': '.NLUModel', '10': 'nluModel'},
     {'1': 'record_mode', '3': 3, '4': 1, '5': 14, '6': '.RecordMode', '10': 'recordMode'},
     {'1': 'stream_id', '3': 4, '4': 1, '5': 9, '10': 'streamId'},
+    {'1': 'stt_framework', '3': 5, '4': 1, '5': 14, '6': '.STTFramework', '10': 'sttFramework'},
+    {'1': 'online_mode', '3': 6, '4': 1, '5': 14, '6': '.OnlineMode', '10': 'onlineMode'},
   ],
 };
 
@@ -176,7 +206,8 @@ final $typed_data.Uint8List recognizeVoiceControlDescriptor = $convert.base64Dec
     'ChVSZWNvZ25pemVWb2ljZUNvbnRyb2wSJQoGYWN0aW9uGAEgASgOMg0uUmVjb3JkQWN0aW9uUg'
     'ZhY3Rpb24SJgoJbmx1X21vZGVsGAIgASgOMgkuTkxVTW9kZWxSCG5sdU1vZGVsEiwKC3JlY29y'
     'ZF9tb2RlGAMgASgOMgsuUmVjb3JkTW9kZVIKcmVjb3JkTW9kZRIbCglzdHJlYW1faWQYBCABKA'
-    'lSCHN0cmVhbUlk');
+    'lSCHN0cmVhbUlkEjIKDXN0dF9mcmFtZXdvcmsYBSABKA4yDS5TVFRGcmFtZXdvcmtSDHN0dEZy'
+    'YW1ld29yaxIsCgtvbmxpbmVfbW9kZRgGIAEoDjILLk9ubGluZU1vZGVSCm9ubGluZU1vZGU=');
 
 @$core.Deprecated('Use recognizeTextControlDescriptor instead')
 const RecognizeTextControl$json = {
@@ -251,4 +282,43 @@ const ExecuteResult$json = {
 final $typed_data.Uint8List executeResultDescriptor = $convert.base64Decode(
     'Cg1FeGVjdXRlUmVzdWx0EhoKCHJlc3BvbnNlGAEgASgJUghyZXNwb25zZRIqCgZzdGF0dXMYAi'
     'ABKA4yEi5FeGVjdXRlU3RhdHVzVHlwZVIGc3RhdHVz');
+
+const $core.Map<$core.String, $core.dynamic> VoiceAgentServiceBase$json = {
+  '1': 'VoiceAgentService',
+  '2': [
+    {'1': 'CheckServiceStatus', '2': '.Empty', '3': '.ServiceStatus'},
+    {'1': 'S_DetectWakeWord', '2': '.VoiceAudio', '3': '.WakeWordStatus', '5': true, '6': true},
+    {'1': 'DetectWakeWord', '2': '.Empty', '3': '.WakeWordStatus', '6': true},
+    {'1': 'S_RecognizeVoiceCommand', '2': '.S_RecognizeVoiceControl', '3': '.RecognizeResult', '5': true},
+    {'1': 'RecognizeVoiceCommand', '2': '.RecognizeVoiceControl', '3': '.RecognizeResult', '5': true},
+    {'1': 'RecognizeTextCommand', '2': '.RecognizeTextControl', '3': '.RecognizeResult'},
+    {'1': 'ExecuteCommand', '2': '.ExecuteInput', '3': '.ExecuteResult'},
+  ],
+};
+
+@$core.Deprecated('Use voiceAgentServiceDescriptor instead')
+const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> VoiceAgentServiceBase$messageJson = {
+  '.Empty': Empty$json,
+  '.ServiceStatus': ServiceStatus$json,
+  '.VoiceAudio': VoiceAudio$json,
+  '.WakeWordStatus': WakeWordStatus$json,
+  '.S_RecognizeVoiceControl': S_RecognizeVoiceControl$json,
+  '.RecognizeResult': RecognizeResult$json,
+  '.IntentSlot': IntentSlot$json,
+  '.RecognizeVoiceControl': RecognizeVoiceControl$json,
+  '.RecognizeTextControl': RecognizeTextControl$json,
+  '.ExecuteInput': ExecuteInput$json,
+  '.ExecuteResult': ExecuteResult$json,
+};
+
+/// Descriptor for `VoiceAgentService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
+final $typed_data.Uint8List voiceAgentServiceDescriptor = $convert.base64Decode(
+    'ChFWb2ljZUFnZW50U2VydmljZRIsChJDaGVja1NlcnZpY2VTdGF0dXMSBi5FbXB0eRoOLlNlcn'
+    'ZpY2VTdGF0dXMSNAoQU19EZXRlY3RXYWtlV29yZBILLlZvaWNlQXVkaW8aDy5XYWtlV29yZFN0'
+    'YXR1cygBMAESKwoORGV0ZWN0V2FrZVdvcmQSBi5FbXB0eRoPLldha2VXb3JkU3RhdHVzMAESRw'
+    'oXU19SZWNvZ25pemVWb2ljZUNvbW1hbmQSGC5TX1JlY29nbml6ZVZvaWNlQ29udHJvbBoQLlJl'
+    'Y29nbml6ZVJlc3VsdCgBEkMKFVJlY29nbml6ZVZvaWNlQ29tbWFuZBIWLlJlY29nbml6ZVZvaW'
+    'NlQ29udHJvbBoQLlJlY29nbml6ZVJlc3VsdCgBEj8KFFJlY29nbml6ZVRleHRDb21tYW5kEhUu'
+    'UmVjb2duaXplVGV4dENvbnRyb2waEC5SZWNvZ25pemVSZXN1bHQSLwoORXhlY3V0ZUNvbW1hbm'
+    'QSDS5FeGVjdXRlSW5wdXQaDi5FeGVjdXRlUmVzdWx0');
 
