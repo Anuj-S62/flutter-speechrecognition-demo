@@ -70,6 +70,9 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/app_state.dart';
 
 enum AssistantMode { wakeWord, manual }
 
@@ -92,7 +95,10 @@ class AssistantModeChoiceState extends State<AssistantModeChoice> {
   @override
   void initState() {
     super.initState();
-    _selectedMode = AssistantMode.manual; // Initialize the selection
+    final appState = context.read<AppState>();
+    _selectedMode = appState.isWakeWordMode
+        ? AssistantMode.wakeWord
+        : AssistantMode.manual; // Initialize the selection
     _theme = widget.theme;
     print(widget.theme);
   }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/app_state.dart';
 
 enum STTModel{
   vosk,
@@ -26,7 +29,8 @@ class _STTModelChoiceState extends State<STTModelChoice> {
   @override
   void initState() {
     super.initState();
-    _selectedModel = STTModel.vosk;
+    final appState = context.read<AppState>();
+    _selectedModel = appState.sttFramework == "vosk" ? STTModel.vosk : STTModel.whisper;
     _theme = widget.theme;
   }
 

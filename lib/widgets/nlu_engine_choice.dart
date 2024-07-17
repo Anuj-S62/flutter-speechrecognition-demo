@@ -68,6 +68,9 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/app_state.dart';
 
 enum NLUEngine { snips, rasa }
 
@@ -90,7 +93,8 @@ class _NLUEngineChoiceState extends State<NLUEngineChoice> {
   @override
   void initState() {
     super.initState();
-    _selectedEngine = NLUEngine.snips; // Initialize the selection
+    final appState = context.read<AppState>();
+    _selectedEngine = appState.intentEngine == "snips" ? NLUEngine.snips : NLUEngine.rasa;
     _theme = widget.theme;
   }
 

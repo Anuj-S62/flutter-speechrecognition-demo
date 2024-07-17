@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_voiceassistant/widgets/online_mode_choice.dart';
 import 'package:flutter_voiceassistant/widgets/try_commands.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import '../models/app_state.dart';
 import '../widgets/nlu_engine_choice.dart';
@@ -38,18 +39,30 @@ class HomePageState extends State<HomePage> {
     super.initState();
     _config = widget.config; // Initialize _config in the initState
     _wakeWord = widget.wakeWord; // Initialize _wakeWord in the initState
-    addChatMessage(
-        "Assistant in Manual mode. You can send commands directly by pressing the record button.");
+    final appState = context.read<AppState>();
+    if(appState.isWakeWordMode){
+      addChatMessage(
+          'Switched to Wake Word mode. I\'ll listen for the wake word "$_wakeWord" before responding.');
+      _startWakeWordDetection(context);
+    }
+    else{
+      addChatMessage(
+          "Assistant in Manual mode. You can send commands directly by pressing the record button.");
+    }
+
   }
 
-  void changeAssistantMode(BuildContext context, AssistantMode newMode) {
+  Future<void> changeAssistantMode(BuildContext context, AssistantMode newMode) async {
     final appState = context.read<AppState>();
     clearChatMessages();
     appState.streamId = "";
     appState.isWakeWordDetected = false;
     appState.isCommandProcessing = false;
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
     if (newMode == AssistantMode.wakeWord) {
+      await prefs.setBool('isWakeWordMode', true);
       addChatMessage(
           'Switched to Wake Word mode. I\'ll listen for the wake word "$_wakeWord" before responding.');
 
@@ -64,6 +77,7 @@ class HomePageState extends State<HomePage> {
         toggleWakeWordDetection(context, true);
       }
     } else if (newMode == AssistantMode.manual) {
+      prefs.setBool('isWakeWordMode', false);
       addChatMessage(
           'Switched to Manual mode. You can send commands directly by pressing record button.');
 
@@ -76,15 +90,17 @@ class HomePageState extends State<HomePage> {
     setState(() {}); // Trigger a rebuild
   }
 
-  void changeIntentEngine(BuildContext context, NLUEngine newEngine) {
+  Future<void> changeIntentEngine(BuildContext context, NLUEngine newEngine) async {
     final appState = context.read<AppState>();
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     if (newEngine == NLUEngine.snips) {
       appState.intentEngine = "snips";
+      await prefs.setString("intentEngine","snips");
       addChatMessage(
           'Switched to 🚀 Snips engine. Lets be precise and accurate.');
     } else if (newEngine == NLUEngine.rasa) {
       appState.intentEngine = "rasa";
+      await prefs.setString("intentEngine","rasa");
       addChatMessage(
           'Switched to 🤖 RASA engine. Conversations just got smarter!');
     }
@@ -92,16 +108,18 @@ class HomePageState extends State<HomePage> {
     setState(() {}); // Trigger a rebuild
   }
 
-  void changeSTTFramework(BuildContext context, STTModel newModel) {
+  Future<void> changeSTTFramework(BuildContext context, STTModel newModel) async {
     final appState = context.read<AppState>();
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     if (newModel == STTModel.vosk) {
       appState.sttFramework = "vosk";
+      await prefs.setString("sttFramework", "vosk");
       // vosk is fast and efficient
       addChatMessage(
           'Switched to 🚀 Vosk framework. Lets be quick and efficient.');
     } else if (newModel == STTModel.whisper) {
       appState.sttFramework = "whisper";
+      await prefs.setString("sttFramework", "whisper");
       addChatMessage(
           'Switched to 🤖 Whisper framework. Conversations just got smarter!');
     }
@@ -109,15 +127,17 @@ class HomePageState extends State<HomePage> {
     setState(() {}); // Trigger a rebuild
   }
 
-  void toggleOnlineMode(BuildContext context, OnlineModeEnum mode) {
+  Future<void> toggleOnlineMode(BuildContext context, OnlineModeEnum mode) async {
     final appState = context.read<AppState>();
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     if (mode == OnlineModeEnum.enabled) {
       appState.onlineMode = true;
+      await prefs.setBool('onlineMode', true);
       addChatMessage(
           'Switched to Online mode. I\'ll be connected to the internet for better results.');
     } else {
       appState.onlineMode = false;
+      await prefs.setBool('onlineMode', false);
       addChatMessage(
           'Switched to Offline mode. I\'ll be disconnected from the internet.');
     }

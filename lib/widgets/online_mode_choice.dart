@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/app_state.dart';
 
 enum OnlineModeEnum{
   enabled,
@@ -26,7 +29,8 @@ class _OnlineModeChoiceState extends State<OnlineModeChoice> {
   @override
   void initState() {
     super.initState();
-    _selectedMode = OnlineModeEnum.disabled;
+    final appState = context.read<AppState>();
+    _selectedMode = appState.onlineMode ? OnlineModeEnum.enabled : OnlineModeEnum.disabled;
     _theme = widget.theme;
   }
 

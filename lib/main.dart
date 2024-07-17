@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_voiceassistant/screens/loading_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'models/app_state.dart';
@@ -103,7 +104,7 @@ class App extends StatelessWidget {
           Consumer<ServiceStatusProvider>(
             builder: (context, provider, child) {
               return provider.isServiceOnline
-                  ? HomePage(config: config, wakeWord: provider.wakeWord)
+                  ? Loading(config: config, wakeWord: provider.wakeWord)
                   : ErrorScreen(
                       onRetry: onRetry,
                     );
