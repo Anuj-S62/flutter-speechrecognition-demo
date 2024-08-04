@@ -9,4 +9,5 @@ class AppState extends ChangeNotifier {
   String commandProcessingText = "Processing...";
   String sttFramework = "vosk";
   bool onlineMode = false;
+  int recordingTime = 4;
 }

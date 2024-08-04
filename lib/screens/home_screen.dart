@@ -16,6 +16,8 @@ import '../grpc/generated/voice_agent.pbgrpc.dart';
 import '../grpc/voice_agent_client.dart';
 import '../utils/app_config.dart';
 import '../widgets/stt_model_choice.dart';
+import '../widgets/wake_word_command_processing.dart';
+import '../widgets/wake_word_recording.dart';
 
 class HomePage extends StatefulWidget {
   final AppConfig config;
@@ -203,24 +205,56 @@ class HomePageState extends State<HomePage> {
   // Function to start listening for wake word status responses
   void _startWakeWordDetection(BuildContext context) {
     final appState = context.read<AppState>();
+    // Base condition
+    if(appState.isWakeWordMode==false){
+      return;
+    }
+    setState(() {});
     voiceAgentClient = VoiceAgentClient(_config.grpcHost, _config.grpcPort);
+    appState.isWakeWordDetected = false;
+    appState.isCommandProcessing = false;
     _wakeWordStatusSubscription = voiceAgentClient.detectWakeWord().listen(
-      (response) {
+          (response) async {
         if (response.status) {
-          // Wake word detected, you can handle this case here
-          // Set _isDetectingWakeWord to false to stop the loop
+          // Wake word detected, handle this case here
           _stopWakeWordDetection();
           appState.isWakeWordDetected = true;
-          addChatMessage(
-              'Wake word detected! Now you can send your command by pressing the record button.');
-          setState(() {}); // Trigger a rebuild
+          addChatMessage('Wake word detected! Starting recording...');
+
+          // Start recording
+          appState.isCommandProcessing = false;
+          String streamId = await startRecording();
+          if (streamId.isNotEmpty) {
+            addChatMessage('Recording started. Please speak your command.');
+
+            // Wait for 4-5 seconds
+            await Future.delayed(Duration(seconds: appState.recordingTime));
+
+            // Stop recording and get the response
+            appState.isCommandProcessing = true;
+            RecognizeResult recognizeResult = await stopRecording(streamId, appState.intentEngine,appState.sttFramework,appState.onlineMode);
+            // Execute the command
+            await executeCommand(recognizeResult);
+
+            // Wait for 1-2 seconds before resuming wake word detection
+            await Future.delayed(Duration(seconds: 1));
+
+            // Resume wake word detection
+            _startWakeWordDetection(context);
+          } else {
+            addChatMessage('Failed to start recording. Please try again.');
+            // Resume wake word detection
+
+            _startWakeWordDetection(context);
+          }
         }
       },
       onError: (error) {
-        // Handle any errors that occur during wake word detection
         print('Error during wake word detection: $error');
         // Set _isDetectingWakeWord to false to stop the loop
         _stopWakeWordDetection();
+        // Resume wake word detection
+        _startWakeWordDetection(context);
       },
       cancelOnError: true,
     );
@@ -679,11 +713,11 @@ class HomePageState extends State<HomePage> {
                   theme: _config.theme,
                 ),
                 SizedBox(height: 10),
-                if (!appState.isWakeWordMode || appState.isWakeWordDetected)
+                if (!appState.isWakeWordMode)
                   TryCommandsSection(
                       onCommandTap: handleCommandTap, theme: _config.theme),
                 SizedBox(height: 30),
-                if (!appState.isWakeWordMode || appState.isWakeWordDetected)
+                if (!appState.isWakeWordMode)
                   if (!appState.isCommandProcessing)
                     Center(
                       child:
@@ -712,13 +746,26 @@ class HomePageState extends State<HomePage> {
                       ),
                     ])
                 else
-                  Center(
-                    child: Consumer<AppState>(
+                  if(!appState.isWakeWordDetected)
+                    Center(
+                      child: Consumer<AppState>(
                       builder: (context, appState, _) {
-                        return ListeningForWakeWordSection();
-                      },
+                          return ListeningForWakeWordSection();
+                        },
+                      ),
+                    )
+                else
+                if (!appState.isCommandProcessing && appState.isWakeWordDetected)
+                  Center(
+                    child:
+                    Consumer<AppState>(builder: (context, appState, _) {
+                      return WakeWordRecording();
+                    }),
+                  )
+                else
+                    Center(
+                      child: ProcessingCommandSection(),
                     ),
-                  ),
                 SizedBox(height: 30),
               ],
             ),
