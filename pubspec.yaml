@@ -9,13 +9,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  protos:
+    path: ./protos
 
   provider: ^6.0.0
-  grpc: ^3.1.0
-  protobuf: ^2.1.0
+  # grpc: ^3.1.0
+  # protobuf: ^2.1.0
   flutter_svg: ^1.1.6
   shared_preferences: ^2.2.3
-  http: ^1.2.2
+
 
 dev_dependencies:
   flutter_test:

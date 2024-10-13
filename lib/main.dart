@@ -6,9 +6,11 @@ import 'models/app_state.dart';
 import 'screens/home_screen.dart';
 import 'screens/error_screen.dart';
 import 'providers/service_status.dart';
-import 'grpc/generated/voice_agent.pbgrpc.dart';
+// import 'grpc/generated/voice_agent.pbgrpc.dart';
 import 'grpc/voice_agent_client.dart';
 import 'utils/app_config.dart';
+import 'package:protos/val_api.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -12,12 +12,13 @@ import '../widgets/assistant_mode_choice.dart';
 import '../widgets/record_command_button.dart';
 import '../widgets/listen_wake_word_section.dart';
 import '../widgets/chat_section.dart';
-import '../grpc/generated/voice_agent.pbgrpc.dart';
+// import '../grpc/generated/voice_agent.pbgrpc.dart';
 import '../grpc/voice_agent_client.dart';
 import '../utils/app_config.dart';
 import '../widgets/stt_model_choice.dart';
 import '../widgets/wake_word_command_processing.dart';
 import '../widgets/wake_word_recording.dart';
+import 'package:protos/val_api.dart';
 
 class HomePage extends StatefulWidget {
   final AppConfig config;

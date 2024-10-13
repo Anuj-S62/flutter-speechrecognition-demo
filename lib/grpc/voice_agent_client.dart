@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'package:grpc/grpc.dart';
-import './generated/voice_agent.pbgrpc.dart';
+// import 'package:grpc/grpc.dart';
+// import 'generated/voice_agent.pbgrpc.dart';
+import 'package:protos/val_api.dart';
+
 
 class VoiceAgentClient {
   late ClientChannel _channel;

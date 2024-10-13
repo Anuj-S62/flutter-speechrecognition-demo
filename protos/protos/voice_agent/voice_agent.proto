@@ -61,6 +61,7 @@ message ServiceStatus {
   string version = 1;
   bool status = 2;
   string wake_word = 3;
+  bool online_mode = 4;
 }
 
 message VoiceAudio {
